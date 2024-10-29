@@ -313,7 +313,7 @@ def main() -> None:
 
     # Indica se houve conflitos
     if aptidao == (N * (N - 1)) // 2:
-        print("\nParabéns! Todas as rainhas estão posicionadas sem conflitos.")
+        print("\nTodas as rainhas estão posicionadas sem conflitos.")
     else:
         conflitos = obter_conflitos(melhor_individuo)
         print(f"\nExistem {conflitos} conflitos nas seguintes posições:")
