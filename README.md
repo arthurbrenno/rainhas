@@ -1,805 +1,825 @@
-# Algoritmo Genético para o Passeio do Cavalo no Tabuleiro de Xadrez
+# Algoritmo Genético para o Problema das N-Rainhas
 
 ## Sumário
 
 1. [Introdução](#introdução)
-2. [Algoritmos Genéticos (AG)](#algoritmos-genéticos-ag)
-   - [Visão Geral](#visão-geral)
-   - [Componentes de um AG](#componentes-de-um-ag)
-     - [Representação dos Indivíduos (Cromossomos)](#representação-dos-indivíduos-cromossomos)
-     - [População Inicial](#população-inicial)
-     - [Função de Fitness](#função-de-fitness)
-     - [Seleção](#seleção)
-     - [Crossover (Recombinação)](#crossover-recombinação)
-     - [Mutação](#mutação)
-3. [Problema do Passeio do Cavalo](#problema-do-passeio-do-cavalo)
-   - [Descrição do Problema](#descrição-do-problema)
-   - [Abordagem com Algoritmo Genético](#abordagem-com-algoritmo-genético)
-4. [Implementação do AG para o Passeio do Cavalo](#implementação-do-ag-para-o-passeio-do-cavalo)
-   - [Estrutura do Código](#estrutura-do-código)
-   - [Funções Principais](#funções-principais)
-     - [Obter Movimentos Possíveis](#obter-movimentos-possíveis)
-     - [Função de Fitness](#função-de-fitness-1)
-     - [Inicializar Indivíduo](#inicializar-indivíduo)
-     - [Inicializar População](#inicializar-população)
-     - [Selecionar Elite](#selecionar-elite)
-     - [Crossover](#crossover)
-     - [Mutação](#mutação-1)
-     - [Algoritmo Genético (AG)](#algoritmo-genético-ag)
-     - [Visualização do Tabuleiro](#visualização-do-tabuleiro)
-     - [Exibir Movimentos](#exibir-movimentos)
-   - [Execução do Algoritmo](#execução-do-algoritmo)
-5. [Análise e Resultados](#análise-e-resultados)
-   - [Convergência](#convergência)
-   - [Eficiência](#eficiência)
-   - [Revisitações](#revisitações)
-6. [Conclusão](#conclusão)
-7. [Referências](#referências)
+2. [Visão Geral do Problema das N-Rainhas](#visão-geral-do-problema-das-nrainhas)
+3. [Conceitos de Algoritmos Genéticos](#conceitos-de-algoritmos-genéticos)
+4. [Descrição do Código](#descrição-do-código)
+    - [Importações e Inicializações](#importações-e-inicializações)
+    - [Definição de Constantes](#definição-de-constantes)
+    - [Função `obter_conflitos`](#função-obter_conflitos)
+    - [Função `fitness`](#função-fitness)
+    - [Função `inicializar_individuo`](#função-inicializar_individuo)
+    - [Função `inicializar_populacao`](#função-inicializar_populacao)
+    - [Função `selecionar_elite`](#função-selecionar_elite)
+    - [Função `crossover`](#função-crossover)
+    - [Função `mutacao`](#função-mutacao)
+    - [Função `ag`](#função-ag)
+    - [Função `visualizar_tabuleiro`](#função-visualizar_tabuleiro)
+    - [Função `exibir_movimentos`](#função-exibir_movimentos)
+    - [Função `main`](#função-main)
+    - [Função `limpar_tela`](#função-limpar_tela)
+5. [Executando o Código](#executando-o-código)
+6. [Análise e Resultados](#análise-e-resultados)
+7. [Conclusão](#conclusão)
+8. [Referências](#referências)
 
 ---
 
 ## Introdução
 
-O **Passeio do Cavalo** é um clássico problema de xadrez que desafia a capacidade de encontrar uma sequência de movimentos de um cavalo de forma que ele visite cada uma das 64 casas do tabuleiro exatamente uma vez. Resolver este problema pode ser feito através de diversas abordagens algorítmicas, incluindo algoritmos genéticos (AG).
+O **Problema das N-Rainhas** é um clássico problema de xadrez e um excelente exemplo para aplicar técnicas de **Algoritmos Genéticos (AG)**. Este guia detalha uma implementação de AG em Python para resolver o problema, explicando cada componente do código e como eles interagem para encontrar uma solução.
 
-Os **Algoritmos Genéticos** são métodos de otimização inspirados na seleção natural e na genética. Eles são eficazes para resolver problemas complexos e de grande escala, onde métodos exatos podem ser ineficientes ou impraticáveis.
+## Visão Geral do Problema das N-Rainhas
 
-Este documento detalha a implementação de um Algoritmo Genético para resolver o problema do Passeio do Cavalo no tabuleiro de xadrez, explicando os conceitos teóricos e a aplicação prática através de um código Python.
+O Problema das N-Rainhas consiste em posicionar **N rainhas** em um tabuleiro de xadrez de **N x N** de forma que nenhuma rainha ataque outra. Isso significa que:
 
----
+- **Nenhuma rainha pode estar na mesma linha.**
+- **Nenhuma rainha pode estar na mesma coluna.**
+- **Nenhuma rainha pode estar na mesma diagonal.**
 
-## Algoritmos Genéticos (AG)
+Para **N = 8**, o problema é conhecido como o problema das 8-Rainhas.
 
-### Visão Geral
+## Conceitos de Algoritmos Genéticos
 
-Os **Algoritmos Genéticos (AG)** são uma classe de algoritmos de busca e otimização inspirados nos processos de evolução natural. Eles operam em uma população de indivíduos, onde cada indivíduo representa uma solução potencial para o problema em questão.
+**Algoritmos Genéticos (AG)** são técnicas de busca e otimização inspiradas na evolução natural. Eles operam em uma população de soluções potenciais, aplicando operações como **seleção**, **crossover (recombinação)** e **mutação** para evoluir soluções melhores ao longo de gerações.
 
-O processo evolutivo nos AGs envolve seleção, reprodução e mutação para gerar novas gerações de indivíduos, com o objetivo de melhorar a qualidade das soluções ao longo do tempo.
+### Componentes Principais de um AG:
 
-### Componentes de um AG
+1. **População Inicial:** Conjunto de soluções potenciais geradas aleatoriamente.
+2. **Função de Fitness:** Mede a qualidade de cada solução.
+3. **Seleção:** Escolhe as melhores soluções para reprodução.
+4. **Crossover:** Combina pares de soluções para criar novos indivíduos.
+5. **Mutação:** Introduz variação aleatória para explorar novas soluções.
+6. **Critério de Parada:** Condição que determina quando o algoritmo deve parar (e.g., número máximo de gerações ou solução perfeita encontrada).
 
-Para entender como os AGs funcionam, é fundamental conhecer seus componentes principais:
+## Descrição do Código
 
-#### Representação dos Indivíduos (Cromossomos)
+O código fornecido implementa um AG para resolver o Problema das N-Rainhas. A seguir, cada parte do código é explicada detalhadamente.
 
-- **Cromossomo:** Representa uma solução potencial para o problema. Pode ser uma sequência de bits, números, ou qualquer estrutura que codifique a solução.
-  
-- **Genes:** Cada elemento do cromossomo, representando uma parte específica da solução.
-
-**No contexto do Passeio do Cavalo:**
-  
-- Cada indivíduo é uma lista de posições no tabuleiro, representando a sequência de movimentos do cavalo.
-  
-- Cada gene é uma posição única no tabuleiro (0 a 63).
-
-#### População Inicial
-
-- **População:** Conjunto de indivíduos (soluções) que serão evoluídos ao longo das gerações.
-
-- **Inicialização:** A população inicial é geralmente gerada aleatoriamente para garantir diversidade genética.
-
-**No Passeio do Cavalo:**
-  
-- A população inicial consiste em várias sequências aleatórias de movimentos válidos do cavalo, começando de posições aleatórias no tabuleiro.
-
-#### Função de Fitness
-
-- **Fitness:** Medida da qualidade de um indivíduo. Quanto maior o fitness, melhor a solução.
-
-- **Objetivo:** Maximizar (ou minimizar) a função de fitness para encontrar a melhor solução possível.
-
-**No Passeio do Cavalo:**
-  
-- A função de fitness conta o número de posições únicas visitadas pelo cavalo na sequência de movimentos.
-
-#### Seleção
-
-- **Seleção:** Processo de escolher quais indivíduos da população atual serão usados para gerar a próxima geração.
-
-- **Métodos Comuns:** Roleta, torneio, seleção elitista.
-
-**No Passeio do Cavalo:**
-  
-- A seleção elitista é utilizada, onde os melhores indivíduos (com maior fitness) são selecionados para serem pais na próxima geração.
-
-#### Crossover (Recombinação)
-
-- **Crossover:** Combinação de genes de dois pais para produzir novos filhos.
-
-- **Tipos:** Single-point, multi-point, uniform.
-
-**No Passeio do Cavalo:**
-  
-- O crossover combina sequências de movimentos de dois pais, garantindo que os filhos resultantes não revisitem posições já visitadas.
-
-#### Mutação
-
-- **Mutação:** Alteração aleatória de genes em um indivíduo para introduzir diversidade.
-
-- **Objetivo:** Evitar a convergência prematura e explorar novas regiões do espaço de soluções.
-
-**No Passeio do Cavalo:**
-  
-- A mutação altera um ponto na sequência de movimentos, substituindo-o por um movimento válido que não tenha sido visitado anteriormente.
-
----
-
-## Problema do Passeio do Cavalo
-
-### Descrição do Problema
-
-O **Passeio do Cavalo** (Knight's Tour) é um problema no qual se busca uma sequência de movimentos de um cavalo de xadrez de forma que ele visite cada uma das 64 casas do tabuleiro exatamente uma vez.
-
-Existem duas variantes:
-
-1. **Passeio Fechado:** O cavalo retorna à casa inicial no final do passeio.
-2. **Passeio Aberto:** O cavalo não necessariamente retorna à casa inicial.
-
-Este trabalho foca no **Passeio Aberto**.
-
-### Abordagem com Algoritmo Genético
-
-Aplicar um **Algoritmo Genético** ao Passeio do Cavalo envolve:
-
-1. **Representação dos Indivíduos:** Sequência de movimentos do cavalo.
-2. **População Inicial:** Diversas sequências aleatórias de movimentos válidos.
-3. **Fitness:** Número de casas únicas visitadas.
-4. **Seleção:** Escolha dos melhores indivíduos para reprodução.
-5. **Crossover e Mutação:** Geração de novos indivíduos através de recombinação e alterações aleatórias.
-6. **Iteração:** Repetir o processo até encontrar uma sequência que visite todas as casas.
-
----
-
-## Implementação do AG para o Passeio do Cavalo
-
-A seguir, detalhamos a implementação do Algoritmo Genético para resolver o Passeio do Cavalo, explicando cada parte do código.
-
-### Estrutura do Código
-
-O código está organizado em diversas funções, cada uma responsável por uma parte específica do AG:
-
-1. **Configurações e Constantes**
-2. **Funções de Utilidade**
-3. **Funções Genéticas (Fitness, Seleção, Crossover, Mutação)**
-4. **Funções de Inicialização**
-5. **Função Principal (main)**
-6. **Visualização e Registro de Revisitações**
-
-### Funções Principais
-
-#### Obter Movimentos Possíveis
+### Importações e Inicializações
 
 ```python
-def obter_movimentos_possiveis(pos_atual: int, tamanho: int = TAMANHO_TABULEIRO) -> List[int]:
-    """
-    Calcula as posições para as quais um cavalo pode se mover em um tabuleiro de xadrez
-    representado unidimensionalmente.
-    """
-    lado: int = int(np.sqrt(tamanho))
-    if lado * lado != tamanho:
-        raise ValueError(
-            "O tamanho do tabuleiro deve ser um quadrado perfeito (e.g., 64 para 8x8)."
-        )
+import numpy as np
+from typing import List, Callable, Tuple
+from colorama import Fore, Style, init
+import random
+import time
+import os
 
-    linha: int = pos_atual // lado
-    coluna: int = pos_atual % lado
-
-    novas_linhas: np.ndarray = linha + POSSIVEIS_MOVIMENTOS_CAVALO[:, 0]
-    novas_colunas: np.ndarray = coluna + POSSIVEIS_MOVIMENTOS_CAVALO[:, 1]
-
-    validos: np.ndarray = (
-        (novas_linhas >= 0)
-        & (novas_linhas < lado)
-        & (novas_colunas >= 0)
-        & (novas_colunas < lado)
-    )
-
-    novos_indices: np.ndarray = novas_linhas[validos] * lado + novas_colunas[validos]
-
-    return novos_indices.tolist()
+# Inicializa o Colorama para cores no console
+init(autoreset=True)
 ```
 
-**Descrição:**
+- **Bibliotecas Utilizadas:**
+  - `numpy`: Para operações numéricas e cálculos estatísticos.
+  - `typing`: Para anotações de tipo que melhoram a legibilidade e manutenção do código.
+  - `colorama`: Para adicionar cores ao output no console, facilitando a visualização das rainhas.
+  - `random`: Para gerar operações aleatórias necessárias no AG.
+  - `time` e `os`: Para manipulação de tempo e operações de sistema, como limpar a tela.
 
-- **Objetivo:** Determinar todas as posições para as quais o cavalo pode se mover a partir de uma posição atual no tabuleiro.
-  
-- **Parâmetros:**
-  - `pos_atual`: Posição atual do cavalo no tabuleiro (0 a 63).
-  - `tamanho`: Tamanho total do tabuleiro (default 64 para 8x8).
-  
-- **Processo:**
-  1. Calcula as coordenadas (linha, coluna) a partir do índice unidimensional.
-  2. Aplica todos os movimentos possíveis do cavalo para obter novas coordenadas.
-  3. Filtra os movimentos que resultam em posições válidas dentro do tabuleiro.
-  4. Converte as coordenadas válidas de volta para índices unidimensionais.
+- **Inicialização do Colorama:**
+  - `init(autoreset=True)`: Configura o Colorama para que as cores sejam resetadas automaticamente após cada impressão, evitando a persistência de estilos indesejados no console.
 
-#### Função de Fitness
+### Definição de Constantes
+
+```python
+# CONSTANTES
+N = 8  # Número de rainhas e tamanho do tabuleiro (pode ser ajustado)
+TAMANHO_POPULACAO = 200  # Tamanho da população inicial
+NUM_GENERACOES = 1000  # Número máximo de gerações
+ELITE_PERCENTUAL = 0.2  # Percentual de elitismo (20%)
+TAXA_CROSSOVER = 0.8  # Taxa de crossover (80%)
+TAXA_MUTACAO = 0.2  # Taxa de mutação (20%)
+```
+
+- **Parâmetros do AG:**
+  - `N`: Define o tamanho do tabuleiro e o número de rainhas. Pode ser ajustado para resolver diferentes variantes do problema.
+  - `TAMANHO_POPULACAO`: Número de indivíduos na população inicial.
+  - `NUM_GENERACOES`: Número máximo de gerações que o AG irá executar.
+  - `ELITE_PERCENTUAL`: Percentual da população que será mantido como elite a cada geração.
+  - `TAXA_CROSSOVER`: Percentual de indivíduos que sofrerão crossover.
+  - `TAXA_MUTACAO`: Percentual de indivíduos que sofrerão mutação.
+
+### Função `obter_conflitos`
+
+```python
+def obter_conflitos(individual: List[int]) -> int:
+    """
+    Calcula o número de conflitos diagonais em uma solução.
+
+    Parameters:
+        individual (List[int]): Representação da solução onde o índice representa a linha e o valor a coluna.
+
+    Returns:
+        int: Número total de conflitos diagonais.
+    """
+    conflitos = 0
+    for i in range(len(individual)):
+        for j in range(i + 1, len(individual)):
+            if abs(individual[i] - individual[j]) == abs(i - j):
+                conflitos += 1
+    return conflitos
+```
+
+- **Objetivo:**
+  - Determinar quantas rainhas estão em conflito diagonalmente.
+
+- **Como Funciona:**
+  - Para cada par de rainhas, verifica se estão na mesma diagonal.
+  - Calcula a diferença absoluta nas colunas e nas linhas. Se forem iguais, há um conflito.
+
+- **Retorno:**
+  - Número total de conflitos diagonais na solução.
+
+### Função `fitness`
 
 ```python
 def fitness(individual: List[int]) -> int:
     """
     Avalia a aptidão de um indivíduo.
 
-    A aptidão é definida como o número de posições únicas visitadas pelo cavalo.
+    A aptidão é definida como o número de pares de rainhas que não estão em conflito.
+
+    Parameters:
+        individual (List[int]): Representação da solução.
+
+    Returns:
+        int: Número de pares não conflitantes.
     """
-    return len(set(individual))
+    total_pares = (N * (N - 1)) // 2
+    conflitos = obter_conflitos(individual)
+    return total_pares - conflitos
 ```
 
-**Descrição:**
+- **Objetivo:**
+  - Medir a qualidade de uma solução. Quanto maior a aptidão, melhor a solução.
 
-- **Objetivo:** Medir a qualidade de um indivíduo na população.
-  
-- **Processo:** Conta o número de posições únicas visitadas pelo cavalo na sequência de movimentos.
+- **Como Funciona:**
+  - Calcula o número total de pares de rainhas possíveis.
+  - Subtrai o número de conflitos diagonais para obter a aptidão.
 
-- **Interpretação:** Quanto maior o número de posições únicas, maior a aptidão do indivíduo.
+- **Retorno:**
+  - Número de pares de rainhas que não estão em conflito.
 
-#### Verificar Revisitas
+### Função `inicializar_individuo`
 
 ```python
-def verificar_revisitas(individual: List[int]) -> bool:
+def inicializar_individuo() -> List[int]:
     """
-    Verifica se o indivíduo possui revisitações.
+    Inicializa um indivíduo com uma permutação aleatória das colunas.
 
-    Retorna True se houver revisitações, False caso contrário.
+    Cada índice da lista representa uma linha e o valor representa a coluna onde a rainha está posicionada.
+
+    Returns:
+        List[int]: Representação de uma solução inicial.
     """
-    visitados = set()
-    for pos in individual:
-        if pos in visitados:
-            revisitas_registradas.append(pos)
-            return True
-        visitados.add(pos)
-    return False
+    individuo = list(range(N))
+    random.shuffle(individuo)
+    return individuo
 ```
 
-**Descrição:**
+- **Objetivo:**
+  - Criar uma solução inicial aleatória onde cada rainha está em uma coluna única, evitando conflitos de coluna por construção.
 
-- **Objetivo:** Detectar se há revisitações (visita repetida a uma posição) no passeio do cavalo.
+- **Como Funciona:**
+  - Gera uma lista de números de 0 a N-1, representando as colunas.
+  - Embaralha a lista para obter uma permutação aleatória.
 
-- **Processo:**
-  1. Percorre a sequência de posições visitadas.
-  2. Se uma posição já foi visitada, registra a revisitação e retorna `True`.
-  3. Se nenhuma revisitação for encontrada, retorna `False`.
+- **Retorno:**
+  - Uma lista representando a posição das rainhas no tabuleiro.
 
-#### Inicializar Indivíduo
+### Função `inicializar_populacao`
 
 ```python
-def inicializar_individuo(posicao_inicial: int) -> List[int]:
+def inicializar_populacao(tamanho: int = TAMANHO_POPULACAO) -> List[List[int]]:
     """
-    Inicializa um indivíduo com um caminho válido começando na posição inicial.
+    Inicializa a população com indivíduos gerados aleatoriamente.
 
-    Tenta construir um caminho até que não seja mais possível adicionar movimentos válidos.
+    Parameters:
+        tamanho (int): Número de indivíduos na população.
+
+    Returns:
+        List[List[int]]: População inicial.
     """
-    caminho = [posicao_inicial]
-    while True:
-        movimentos = obter_movimentos_possiveis(caminho[-1])
-        movimentos_possiveis = [m for m in movimentos if m not in caminho]
-        if not movimentos_possiveis:
-            break
-        proximo_movimento = random.choice(movimentos_possiveis)
-        caminho.append(proximo_movimento)
-    return caminho
+    return [inicializar_individuo() for _ in range(tamanho)]
 ```
 
-**Descrição:**
+- **Objetivo:**
+  - Gerar uma lista de indivíduos aleatórios para formar a população inicial do AG.
 
-- **Objetivo:** Criar um caminho inicial para um indivíduo, começando de uma posição inicial aleatória.
+- **Como Funciona:**
+  - Chama a função `inicializar_individuo` repetidamente para criar o número especificado de indivíduos.
 
-- **Processo:**
-  1. Inicia o caminho com a posição inicial.
-  2. Repetidamente adiciona um movimento válido que não foi visitado anteriormente.
-  3. Para quando não há mais movimentos válidos disponíveis.
+- **Retorno:**
+  - Lista contendo os indivíduos da população inicial.
 
-#### Inicializar População
-
-```python
-def inicializar_populacao(tamanho: int = POPULACAO_INICIAL_TAMANHO) -> List[List[int]]:
-    """
-    Inicializa a população com indivíduos gerados aleatoriamente a partir de posições iniciais aleatórias.
-    """
-    populacao = []
-    for _ in range(tamanho):
-        pos_inicial = random.randint(0, TAMANHO_TABULEIRO - 1)
-        individuo = inicializar_individuo(pos_inicial)
-        # Verifica se há revisitações
-        if verificar_revisitas(individuo):
-            print(f"[Aviso] Indivíduo inicializado com revisitação na posição {revisitas_registradas[-1]}.")
-        populacao.append(individuo)
-    return populacao
-```
-
-**Descrição:**
-
-- **Objetivo:** Gerar a população inicial do AG.
-
-- **Processo:**
-  1. Para cada indivíduo na população:
-     - Seleciona uma posição inicial aleatória.
-     - Cria um caminho válido a partir dessa posição.
-     - Verifica se há revisitações no caminho.
-     - Adiciona o indivíduo à população.
-
-#### Selecionar Elite
+### Função `selecionar_elite`
 
 ```python
-def selecionar_elite(populacao: List[List[int]], fitness_func: Callable[[List[int]], int], elite_percentual: float = ELITE_PERCENTUAL) -> List[List[int]]:
+def selecionar_elite(
+    populacao: List[List[int]],
+    fitness_func: Callable[[List[int]], int],
+    elite_percentual: float = ELITE_PERCENTUAL,
+) -> List[List[int]]:
     """
     Seleciona a elite da população baseada na aptidão.
+
+    Parameters:
+        populacao (List[List[int]]): População atual.
+        fitness_func (Callable[[List[int]], int]): Função de fitness.
+        elite_percentual (float): Percentual da elite a ser selecionada.
+
+    Returns:
+        List[List[int]]: Elite selecionada.
     """
-    populacao_ordenada = sorted(populacao, key=lambda ind: fitness_func(ind), reverse=True)
+    populacao_ordenada = sorted(
+        populacao, key=lambda ind: fitness_func(ind), reverse=True
+    )
     elite_tamanho = max(1, int(len(populacao) * elite_percentual))
     elite = populacao_ordenada[:elite_tamanho]
-    
-    # Verifica se a elite possui revisitações
-    for ind in elite:
-        if verificar_revisitas(ind):
-            print(f"[Erro] Elite contém indivíduo com revisitação na posição {revisitas_registradas[-1]}.")
-    
     return elite
 ```
 
-**Descrição:**
+- **Objetivo:**
+  - Selecionar os melhores indivíduos (elite) da população atual para reprodução.
 
-- **Objetivo:** Selecionar os melhores indivíduos (elite) da população atual para reprodução.
+- **Como Funciona:**
+  - Ordena a população com base na aptidão, do maior para o menor.
+  - Calcula o tamanho da elite com base no percentual definido.
+  - Seleciona os top `elite_percentual` indivíduos como elite.
 
-- **Processo:**
-  1. Ordena a população com base na aptidão (fitness).
-  2. Seleciona os top `elite_percentual` indivíduos como elite.
-  3. Verifica se algum indivíduo da elite possui revisitações.
+- **Retorno:**
+  - Lista contendo os indivíduos da elite.
 
-#### Crossover
+### Função `crossover`
 
 ```python
 def crossover(parent1: List[int], parent2: List[int]) -> Tuple[List[int], List[int]]:
     """
-    Realiza o crossover entre dois pais para gerar dois filhos.
+    Realiza o crossover entre dois pais para gerar dois filhos utilizando o método de PMX (Partially Mapped Crossover).
+
+    Parameters:
+        parent1 (List[int]): Primeiro pai.
+        parent2 (List[int]): Segundo pai.
+
+    Returns:
+        Tuple[List[int], List[int]]: Dois filhos gerados.
     """
-    if len(parent1) < 2 or len(parent2) < 2:
-        return parent1.copy(), parent2.copy()
+    if len(parent1) != len(parent2):
+        raise ValueError("Pais devem ter o mesmo comprimento.")
 
-    ponto_corte = random.randint(1, min(len(parent1), len(parent2)) - 1)
+    # Seleciona dois pontos de crossover aleatórios
+    ponto1 = random.randint(0, N - 2)
+    ponto2 = random.randint(ponto1 + 1, N - 1)
 
-    # Filho 1
-    filho1 = parent1[:ponto_corte]
-    for move in parent2:
-        if move not in filho1:
-            filho1.append(move)
-            if len(filho1) == TAMANHO_TABULEIRO:
-                break
+    # Cria os filhos com segmentos trocados
+    segmento_pai1 = parent1[ponto1:ponto2]
+    segmento_pai2 = parent2[ponto1:ponto2]
 
-    # Filho 2
-    filho2 = parent2[:ponto_corte]
-    for move in parent1:
-        if move not in filho2:
-            filho2.append(move)
-            if len(filho2) == TAMANHO_TABULEIRO:
-                break
+    filho1 = parent1[:ponto1] + segmento_pai2 + parent1[ponto2:]
+    filho2 = parent2[:ponto1] + segmento_pai1 + parent2[ponto2:]
 
-    # Verifica se os filhos possuem revisitações
-    if verificar_revisitas(filho1):
-        print(f"[Aviso] Filho1 criado com revisitação na posição {revisitas_registradas[-1]}.")
-    if verificar_revisitas(filho2):
-        print(f"[Aviso] Filho2 criado com revisitação na posição {revisitas_registradas[-1]}.")
+    # Corrige os filhos para manter a permutação válida
+    def corrigir_filho(
+        filho: List[int], segmento: List[int], pai: List[int]
+    ) -> List[int]:
+        mapeamento = {segmento[i]: pai[ponto1 + i] for i in range(len(segmento))}
+        for i in range(len(filho)):
+            if filho[i] in segmento and not (ponto1 <= i < ponto2):
+                filho[i] = mapeamento[filho[i]]
+        return filho
+
+    filho1 = corrigir_filho(filho1, segmento_pai2, parent1)
+    filho2 = corrigir_filho(filho2, segmento_pai1, parent2)
 
     return filho1, filho2
 ```
 
-**Descrição:**
+- **Objetivo:**
+  - Combinar duas soluções (pais) para produzir novas soluções (filhos).
 
-- **Objetivo:** Combinar duas soluções (pais) para produzir novas soluções (filhos).
+- **Como Funciona:**
+  - **Seleção de Pontos de Crossover:**
+    - Seleciona dois pontos aleatórios no cromossomo (lista de posições das rainhas).
+  - **Troca de Segmentos:**
+    - Troca os segmentos entre os pais para criar os filhos.
+  - **Correção de Permutação:**
+    - Garante que cada filho seja uma permutação válida, sem repetições de colunas.
+    - Mapeia os valores conflitantes de volta às colunas corretas com base nos pais.
 
-- **Processo:**
-  1. Seleciona um ponto de corte aleatório comum aos dois pais.
-  2. Gera dois filhos combinando as partes dos pais:
-     - **Filho 1:** Parte inicial de `parent1` + movimentos exclusivos de `parent2`.
-     - **Filho 2:** Parte inicial de `parent2` + movimentos exclusivos de `parent1`.
-  3. Garante que os filhos não revisitem posições já visitadas.
-  4. Registra qualquer revisitação detectada nos filhos.
+- **Retorno:**
+  - Dois filhos gerados a partir dos pais.
 
-#### Mutação
+### Função `mutacao`
 
 ```python
 def mutacao(individual: List[int]) -> List[int]:
     """
-    Realiza a mutação em um indivíduo.
+    Realiza a mutação em um indivíduo trocando duas posições aleatórias.
+
+    Parameters:
+        individual (List[int]): Indivíduo a ser mutado.
+
+    Returns:
+        List[int]: Indivíduo mutado.
     """
-    if len(individual) < 2:
-        return individual.copy()
-
-    # Seleciona um ponto de mutação, excluindo a posição inicial
-    ponto_mutacao = random.randint(1, len(individual) - 1)
-
-    pos_atual = individual[ponto_mutacao - 1]
-    movimentos = obter_movimentos_possiveis(pos_atual)
-
-    # Exclui movimentos que já foram visitados antes do ponto de mutacao
-    movimentos_possiveis = [m for m in movimentos if m not in individual[:ponto_mutacao]]
-
-    if movimentos_possiveis:
-        novo_movimento = random.choice(movimentos_possiveis)
-        # Substitui o movimento no ponto de mutacao
-        novo_individual = individual[:ponto_mutacao] + [novo_movimento]
-        # Continua a construir o caminho a partir do novo movimento
-        while True:
-            movimentos = obter_movimentos_possiveis(novo_individual[-1])
-            movimentos_possiveis = [m for m in movimentos if m not in novo_individual]
-            if not movimentos_possiveis:
-                break
-            proximo_movimento = random.choice(movimentos_possiveis)
-            novo_individual.append(proximo_movimento)
-        # Verifica se a mutação resultou em revisitações
-        if verificar_revisitas(novo_individual):
-            print(f"[Aviso] Mutação resultou em revisitação na posição {revisitas_registradas[-1]}.")
-        return novo_individual
-    else:
-        return individual.copy()
+    novo_individuo = individual.copy()
+    pos1, pos2 = random.sample(range(N), 2)
+    novo_individuo[pos1], novo_individuo[pos2] = (
+        novo_individuo[pos2],
+        novo_individuo[pos1],
+    )
+    return novo_individuo
 ```
 
-**Descrição:**
+- **Objetivo:**
+  - Introduzir variação nos indivíduos para explorar novas soluções.
 
-- **Objetivo:** Introduzir variação nos indivíduos para explorar novas soluções.
+- **Como Funciona:**
+  - Seleciona duas posições aleatórias no cromossomo.
+  - Troca os valores nessas posições, mantendo a permutação válida.
 
-- **Processo:**
-  1. Seleciona um ponto aleatório na sequência de movimentos (exceto o inicial).
-  2. Escolhe um novo movimento válido a partir da posição anterior ao ponto de mutação.
-  3. Substitui o movimento no ponto de mutação e continua a construir o caminho a partir daí.
-  4. Garante que não haja revisitações após a mutação.
-  5. Registra qualquer revisitação detectada.
+- **Retorno:**
+  - Indivíduo após a mutação.
 
-#### Algoritmo Genético (AG)
+### Função `ag`
 
 ```python
-def ag(pop: List[List[int]], fitness_func: Callable[[List[int]], int], geracoes: int = NUM_GENERACOES) -> List[int]:
+def ag(
+    populacao: List[List[int]],
+    fitness_func: Callable[[List[int]], int],
+    geracoes: int = NUM_GENERACOES,
+) -> Tuple[List[int], List[int], List[float], int]:
     """
-    Implementa o Algoritmo Genético com crossover e mutação.
+    Implementa o Algoritmo Genético para resolver o Problema das N-Rainhas.
 
-    Parameters
-    ----------
-    pop : List[List[int]]
-        População inicial de indivíduos.
-    fitness_func : Callable[[List[int]], int]
-        Função de avaliação da aptidão.
-    geracoes : int
-        Número de gerações para executar o algoritmo.
+    Parameters:
+        populacao (List[List[int]]): População inicial.
+        fitness_func (Callable[[List[int]], int]): Função de fitness.
+        geracoes (int): Número máximo de gerações.
 
-    Returns
-    -------
-    List[int]
-        O melhor indivíduo encontrado após todas as gerações.
+    Returns:
+        Tuple[List[int], List[int], List[float], int]: Melhor indivíduo, lista de melhor fitness por geração,
+                                                          lista de aptidão média por geração, total de gerações executadas.
     """
-    for geracao in range(geracoes):
+    melhor_fitness_por_geracao = []
+    aptidao_media_por_geracao = []
+    melhor_individuo = None
+    melhor_fitness = -1
+    geracoes_executadas = 0
+
+    for geracao in range(1, geracoes + 1):
         # Avalia a aptidão de todos os indivíduos
-        populacao_com_fitness = [(ind, fitness_func(ind)) for ind in pop]
+        populacao_com_fitness = [(ind, fitness_func(ind)) for ind in populacao]
         populacao_com_fitness.sort(key=lambda x: x[1], reverse=True)
-        melhor_individuo, melhor_fitness = populacao_com_fitness[0]
+        atual_melhor_individuo, atual_melhor_fitness = populacao_com_fitness[0]
+        aptidao_media = sum(f for _, f in populacao_com_fitness) / len(
+            populacao_com_fitness
+        )
 
-        # Exibe o progresso a cada 500 gerações
-        if geracao % 500 == 0 or geracao == geracoes - 1:
-            print(f"Geração {geracao}: Melhor Aptidão = {melhor_fitness}")
+        # Atualiza o melhor indivíduo encontrado até agora
+        if atual_melhor_fitness > melhor_fitness:
+            melhor_fitness = atual_melhor_fitness
+            melhor_individuo = atual_melhor_individuo.copy()
+
+        # Armazena as métricas da geração atual
+        melhor_fitness_por_geracao.append(atual_melhor_fitness)
+        aptidao_media_por_geracao.append(aptidao_media)
+
+        # Exibe o progresso a cada 100 gerações
+        if geracao % 100 == 0 or geracao == 1 or geracao == geracoes:
+            print(
+                f"Geração {geracao}: Melhor Aptidão = {atual_melhor_fitness}, Aptidão Média = {aptidao_media:.2f}"
+            )
 
         # Verifica se encontrou uma solução perfeita
-        if melhor_fitness == TAMANHO_TABULEIRO:
-            print(f"Solução perfeita encontrada na geração {geracao}!")
-            return melhor_individuo
+        if atual_melhor_fitness == (N * (N - 1)) // 2:
+            print(f"\n[Solução Perfeita] Encontrada na geração {geracao}!")
+            geracoes_executadas = geracao
+            return (
+                melhor_individuo,
+                melhor_fitness_por_geracao,
+                aptidao_media_por_geracao,
+                geracoes_executadas,
+            )
 
         # Seleciona a elite
-        elite = selecionar_elite(pop, fitness_func)
+        elite = selecionar_elite(populacao, fitness_func)
 
         # Gera a nova população
         nova_populacao = elite.copy()
 
-        # Quantidade de crossover e mutação
-        num_crossover = int((POPULACAO_INICIAL_TAMANHO - len(nova_populacao)) * TAXA_CROSSOVER)
-        num_mutacao = int((POPULACAO_INICIAL_TAMANHO - len(nova_populacao)) * TAXA_MUTACAO)
+        # Calcula quantos indivíduos sofrerão crossover e mutação
+        num_crossover = int((TAMANHO_POPULACAO - len(nova_populacao)) * TAXA_CROSSOVER)
+        num_mutacao = int((TAMANHO_POPULACAO - len(nova_populacao)) * TAXA_MUTACAO)
 
-        # Realiza crossover
+        # Realiza o crossover
         for _ in range(num_crossover // 2):
-            if len(elite) < 2:
-                break
             parent1, parent2 = random.sample(elite, 2)
             filho1, filho2 = crossover(parent1, parent2)
-            nova_populacao.append(filho1)
-            nova_populacao.append(filho2)
-            if len(nova_populacao) >= POPULACAO_INICIAL_TAMANHO:
+            nova_populacao.extend([filho1, filho2])
+            if len(nova_populacao) >= TAMANHO_POPULACAO:
                 break
 
-        # Realiza mutação
+        # Realiza a mutação
         for _ in range(num_mutacao):
             individuo = random.choice(elite)
             novo_individuo = mutacao(individuo)
             nova_populacao.append(novo_individuo)
-            if len(nova_populacao) >= POPULACAO_INICIAL_TAMANHO:
+            if len(nova_populacao) >= TAMANHO_POPULACAO:
                 break
 
-        # Preenche o restante da população com cópias da elite (sem alteração)
-        while len(nova_populacao) < POPULACAO_INICIAL_TAMANHO:
+        # Preenche o restante da população com indivíduos da elite
+        while len(nova_populacao) < TAMANHO_POPULACAO:
             nova_populacao.append(random.choice(elite).copy())
 
         # Atualiza a população para a próxima geração
-        pop = nova_populacao
+        populacao = nova_populacao
+        geracoes_executadas = geracao
 
-    # Após todas as gerações, retorna o melhor indivíduo encontrado
-    melhor_individuo = max(pop, key=lambda ind: fitness_func(ind))
-    return melhor_individuo
+    # Retorna o melhor indivíduo após todas as gerações
+    return (
+        melhor_individuo,
+        melhor_fitness_por_geracao,
+        aptidao_media_por_geracao,
+        geracoes_executadas,
+    )
 ```
 
-**Descrição:**
+- **Objetivo:**
+  - Implementar o núcleo do Algoritmo Genético para resolver o Problema das N-Rainhas.
 
-- **Objetivo:** Evoluir a população de indivíduos através de seleção, crossover e mutação para encontrar uma solução completa para o Passeio do Cavalo.
+- **Parâmetros:**
+  - `populacao`: População inicial de indivíduos.
+  - `fitness_func`: Função que avalia a aptidão de um indivíduo.
+  - `geracoes`: Número máximo de gerações a serem executadas.
 
-- **Processo:**
-  1. **Avaliação:** Calcula a aptidão de todos os indivíduos na população.
-  2. **Seleção:** Ordena a população com base na aptidão e seleciona a elite.
-  3. **Crossover e Mutação:** Gera novos indivíduos combinando e alterando os da elite.
-  4. **Elitismo:** Mantém a elite intacta na nova população.
-  5. **Repetição:** Repete o processo para o número definido de gerações ou até encontrar uma solução completa.
-  6. **Retorno:** Retorna o melhor indivíduo encontrado após as gerações.
+- **Fluxo de Execução:**
+  1. **Avaliação da População:**
+     - Calcula a aptidão de cada indivíduo na população.
+     - Ordena a população com base na aptidão, do maior para o menor.
+  2. **Atualização do Melhor Indivíduo:**
+     - Verifica se o melhor indivíduo da geração atual é o melhor encontrado até agora.
+  3. **Armazenamento de Métricas:**
+     - Armazena a melhor aptidão e a aptidão média da geração atual.
+  4. **Exibição do Progresso:**
+     - Imprime o progresso a cada 100 gerações, ou na primeira e última geração.
+  5. **Verificação de Solução Perfeita:**
+     - Se a aptidão do melhor indivíduo for igual ao número total de pares possíveis, considera-se uma solução perfeita encontrada e o algoritmo para.
+  6. **Seleção da Elite:**
+     - Seleciona os melhores indivíduos da população para formar a elite.
+  7. **Geração da Nova População:**
+     - Realiza crossover e mutação nos indivíduos da elite para gerar novos filhos.
+     - Preenche a população com indivíduos da elite caso necessário.
+  8. **Atualização da População:**
+     - Atualiza a população para a próxima geração.
+  9. **Retorno dos Resultados:**
+     - Após todas as gerações, retorna o melhor indivíduo encontrado, as métricas por geração e o número total de gerações executadas.
 
-#### Visualização do Tabuleiro
+- **Retorno:**
+  - **`melhor_individuo`**: Melhor solução encontrada.
+  - **`melhor_fitness_por_geracao`**: Lista das melhores aptidões por geração.
+  - **`aptidao_media_por_geracao`**: Lista das aptidões médias por geração.
+  - **`geracoes_executadas`**: Número total de gerações executadas.
+
+### Função `visualizar_tabuleiro`
 
 ```python
-def tabuleiro(
-    posicoes: List[int], possiveis_movimentos: Optional[List[int]] = None
-) -> str:
+def visualizar_tabuleiro(individual: List[int]) -> str:
     """
-    Gera uma representação visual do tabuleiro com o caminho do cavalo.
+    Gera uma representação visual do tabuleiro de xadrez com as rainhas posicionadas.
 
-    Parameters
-    ----------
-    posicoes : List[int]
-        Sequência de posições visitadas pelo cavalo.
-    possiveis_movimentos : list[int], optional
-        Últimos movimentos possíveis do cavalo (não usado aqui).
+    Parameters:
+        individual (List[int]): Representação da solução.
 
-    Returns
-    -------
-    str
-        Representação visual do tabuleiro.
+    Returns:
+        str: Representação visual do tabuleiro.
     """
-    lado: int = int(np.sqrt(TAMANHO_TABULEIRO))
-    if lado * lado != TAMANHO_TABULEIRO:
-        raise ValueError(
-            "O tamanho do tabuleiro deve ser um quadrado perfeito (e.g., 64 para 8x8)."
-        )
+    cabecalho = "   " + "  ".join([chr(ord("A") + i) for i in range(N)])
+    linhas_visual = [cabecalho]
 
-    # Define etiquetas de colunas (A, B, C, ...)
-    etiquetas_colunas: List[str] = [chr(ord("A") + i) for i in range(lado)]
-    cabecalho: str = "   " + "  ".join(etiquetas_colunas)
-
-    # Mapeia cada posição para o número da ordem em que foi visitada
-    ordem_visita = {pos: idx + 1 for idx, pos in enumerate(posicoes)}
-
-    linhas_visual: List[str] = [cabecalho]
-    for linha in range(lado):
-        etiqueta_linha: str = str(lado - linha)
-        linha_visual: List[str] = [f"{etiqueta_linha} "]
-        for coluna in range(lado):
-            indice_atual: int = (lado * (lado - 1 - linha)) + coluna
-
-            if indice_atual in ordem_visita:
-                # Representa a posição do cavalo com o número da ordem em verde
-                casa = Fore.GREEN + f"{ordem_visita[indice_atual]:2}" + Style.RESET_ALL
+    for linha in range(N):
+        linha_visual = [f"{N - linha} "]
+        for coluna in range(N):
+            if individual[linha] == coluna:
+                linha_visual.append(Fore.RED + "Q " + Style.RESET_ALL)
             else:
-                # Representa outras casas com seus números em branco
-                casa = f"{indice_atual:2}"
-
-            linha_visual.append(casa + " ")
+                linha_visual.append(". ")
         linhas_visual.append(" ".join(linha_visual).rstrip())
 
     return "\n".join(linhas_visual)
 ```
 
-**Descrição:**
+- **Objetivo:**
+  - Criar uma string que representa o tabuleiro de xadrez, destacando as posições das rainhas com a letra "Q" em vermelho.
 
-- **Objetivo:** Gerar uma representação visual do tabuleiro de xadrez, destacando as posições visitadas pelo cavalo e a ordem em que foram visitadas.
+- **Como Funciona:**
+  - Gera o cabeçalho do tabuleiro com as colunas de A a H (ou até N).
+  - Para cada linha do tabuleiro, verifica se há uma rainha naquela coluna.
+  - Se houver, coloca uma "Q" colorida; caso contrário, coloca um ponto ".".
 
-- **Processo:**
-  1. Calcula as coordenadas 2D do tabuleiro a partir dos índices unidimensionais.
-  2. Mapeia cada posição visitada para o número do passo em que foi visitada.
-  3. Gera uma string representando o tabuleiro com cores para facilitar a visualização:
-     - **Verde:** Indica a ordem de visita das casas.
-     - **Branco:** Indica casas não visitadas.
+- **Retorno:**
+  - String representando o tabuleiro com as rainhas posicionadas.
 
-#### Exibir Movimentos
+### Função `exibir_movimentos`
 
 ```python
-def exibir_movimento(posicoes: List[int]) -> None:
+def exibir_movimentos(individual: List[int]) -> None:
     """
-    Exibe o tabuleiro com o caminho do cavalo passo a passo.
+    Exibe o tabuleiro com as rainhas posicionadas passo a passo.
 
-    Parameters
-    ----------
-    posicoes : List[int]
-        Sequência de posições visitadas pelo cavalo.
+    Parameters:
+        individual (List[int]): Representação da solução.
     """
-    ordem_visita = {pos: idx + 1 for idx, pos in enumerate(posicoes)}
-    lado: int = int(np.sqrt(TAMANHO_TABULEIRO))
+    cabecalho = "   " + "  ".join([chr(ord("A") + i) for i in range(N)])
 
-    etiquetas_colunas: List[str] = [chr(ord("A") + i) for i in range(lado)]
-    cabecalho: str = "   " + "  ".join(etiquetas_colunas)
-
-    for idx, pos in enumerate(posicoes):
+    for linha in range(N):
         # Limpa a tela
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print("Passeio do Cavalo - Visualização\n")
-        print(f"Passo Atual: {idx + 1}\n")
+        os.system("cls" if os.name == "nt" else "clear")
+        print("Problema das N-Rainhas - Visualização\n")
+        print(f"Posicionando a rainha na linha {linha + 1}...\n")
         print(cabecalho)
 
-        for linha in range(lado):
-            etiqueta_linha: str = str(lado - linha)
-            linha_visual: List[str] = [f"{etiqueta_linha} "]
-            for coluna in range(lado):
-                indice_atual: int = (lado * (lado - 1 - linha)) + coluna
-
-                if indice_atual == pos:
-                    # Representa a posição atual do cavalo com 'K' em vermelho
-                    casa = Fore.RED + " K" + Style.RESET_ALL
-                elif indice_atual in ordem_visita:
-                    # Representa casas já visitadas com o número da ordem em azul
-                    casa = Fore.BLUE + f"{ordem_visita[indice_atual]:2}" + Style.RESET_ALL
+        for l in range(N):
+            linha_visual = [f"{N - l} "]
+            for coluna in range(N):
+                if individual[l] == coluna and l <= linha:
+                    linha_visual.append(Fore.RED + "Q " + Style.RESET_ALL)
                 else:
-                    # Representa outras casas com seus números em branco
-                    casa = f"{indice_atual:2}"
-
-                linha_visual.append(casa + " ")
+                    linha_visual.append(". ")
             print(" ".join(linha_visual).rstrip())
 
-        # Delay para visualizar o movimento
-        time.sleep(0.05)  # Ajuste o delay conforme necessário
+        time.sleep(0.5)  # Delay para visualização
 ```
 
-**Descrição:**
+- **Objetivo:**
+  - Mostrar uma animação passo a passo do posicionamento das rainhas no tabuleiro.
 
-- **Objetivo:** Mostrar uma animação passo a passo do movimento do cavalo pelo tabuleiro.
+- **Como Funciona:**
+  - Para cada linha do tabuleiro:
+    1. Limpa a tela para atualizar a visualização.
+    2. Exibe uma mensagem indicando a linha atual onde a rainha está sendo posicionada.
+    3. Imprime o tabuleiro com as rainhas posicionadas até a linha atual.
+    4. Aguarda 0,5 segundos antes de continuar para a próxima linha.
 
-- **Processo:**
-  1. Itera sobre cada posição visitada.
-  2. Para cada posição:
-     - Limpa a tela.
-     - Exibe o passo atual.
-     - Mostra o tabuleiro com a posição atual destacada em vermelho ('K') e as posições já visitadas em azul com o número do passo.
-  3. Adiciona um pequeno atraso (`time.sleep(0.05)`) para simular a animação.
+- **Retorno:**
+  - Não retorna nada; apenas exibe a visualização no console.
 
-#### Execução do Algoritmo
+### Função `main`
 
 ```python
 def main() -> None:
-    print("Passeio do Cavalo - Algoritmo Genético com Crossover e Mutação\n")
+    """
+    Função principal para executar o Algoritmo Genético e resolver o Problema das N-Rainhas.
+    """
+    print(f"Problema das {N}-Rainhas - Algoritmo Genético\n")
 
     # Inicializa a população
     populacao_inicial = inicializar_populacao()
 
-    # Executa o algoritmo genético
-    melhor_individuo = ag(populacao_inicial, fitness, geracoes=NUM_GENERACOES)
+    # Executa o Algoritmo Genético
+    print("Iniciando o Algoritmo Genético...")
+    (
+        melhor_individuo,
+        melhor_fitness_por_geracao,
+        aptidao_media_por_geracao,
+        geracoes_executadas,
+    ) = ag(populacao_inicial, fitness, geracoes=NUM_GENERACOES)
 
-    # Verifica se uma solução completa foi encontrada
-    if fitness(melhor_individuo) == TAMANHO_TABULEIRO:
-        print("\nMelhor Caminho Encontrado (Solução Completa):")
+    # Avalia a melhor solução encontrada
+    aptidao = fitness(melhor_individuo)
+    print("\nMelhor Caminho Encontrado:")
+    if aptidao == (N * (N - 1)) // 2:
+        print("Solução Completa!")
     else:
-        print("\nMelhor Caminho Encontrado (Não Completo):")
-    print(f"Aptidão: {fitness(melhor_individuo)}")
+        print("Solução Parcial.")
+    print(f"Aptidão: {aptidao} / {(N * (N - 1)) // 2}")
 
-    # Exibe o caminho passo a passo
-    exibir_movimento(melhor_individuo)
-
-    # Exibe a representação final do tabuleiro
+    # Exibe o tabuleiro final
     print("\nRepresentação Final do Tabuleiro:")
-    print(tabuleiro(melhor_individuo))
+    print(visualizar_tabuleiro(melhor_individuo))
 
-    # Exibe a lista ordenada de casas visitadas
-    ordem_visita = {pos: idx + 1 for idx, pos in enumerate(melhor_individuo)}
-    casas_visitadas_ordenadas = sorted(ordem_visita.items(), key=lambda x: x[1])
-    lista_casas_visitadas = [f"{pos} (Passo {ord})" for pos, ord in casas_visitadas_ordenadas]
-    
+    # Exibe a lista ordenada de posições das rainhas
+    lista_casas_visitadas = [
+        f"Linha {i + 1}: Coluna {chr(ord('A') + melhor_individuo[i])}" for i in range(N)
+    ]
     print("\nLista Ordenada de Casas Visitadas:")
-    print(", ".join(lista_casas_visitadas))
+    for casa in lista_casas_visitadas:
+        print(casa)
 
-    # Verifica se todas as casas foram visitadas
-    casas_visitadas = set(melhor_individuo)
-    casas_faltantes = set(range(TAMANHO_TABULEIRO)) - casas_visitadas
-
-    if not casas_faltantes:
-        print("\nParabéns! O cavalo percorreu todas as 64 casas.")
+    # Indica se houve conflitos
+    if aptidao == (N * (N - 1)) // 2:
+        print("\nTodas as rainhas estão posicionadas sem conflitos.")
     else:
-        print(f"\nO cavalo não percorreu as seguintes casas ({len(casas_faltantes)} faltando):")
-        print(", ".join(map(str, sorted(casas_faltantes))))
+        conflitos = obter_conflitos(melhor_individuo)
+        print(f"\nExistem {conflitos} conflitos nas seguintes posições:")
+        for i in range(N):
+            for j in range(i + 1, N):
+                if abs(melhor_individuo[i] - melhor_individuo[j]) == abs(i - j):
+                    print(
+                        f"Rainha na Linha {i + 1}, Coluna {chr(ord('A') + melhor_individuo[i])} conflita com a Rainha na Linha {j + 1}, Coluna {chr(ord('A') + melhor_individuo[j])}."
+                    )
 
-    # Verifica se houve revisitações
-    if revisitas_registradas:
-        print(f"\nRevisitações detectadas nas seguintes casas: {', '.join(map(str, revisitas_registradas))}")
-    else:
-        print("\nNenhuma revisitação detectada.")
+    # Exibe as métricas significativas
+    print("\n--- Métricas do Algoritmo Genético ---")
+    print(f"Total de Gerações Executadas: {geracoes_executadas}")
+    print(f"Aptidão Final: {aptidao} / {(N * (N - 1)) // 2}")
+    if aptidao < (N * (N - 1)) // 2:
+        print(f"Total de Conflitos na Solução Final: {aptidao}")
+    print(f"Aptidão Média por Geração: {np.mean(aptidao_media_por_geracao):.2f}")
+    print(f"Aptidão Máxima por Geração: {max(melhor_fitness_por_geracao)}")
+    print(f"Aptidão Mínima por Geração: {min(melhor_fitness_por_geracao)}")
+    print(f"Desvio Padrão da Aptidão Média: {np.std(aptidao_media_por_geracao):.2f}")
+
+    # Pausa antes da visualização para garantir que as métricas sejam lidas
+    input("\nPressione Enter para iniciar a visualização passo a passo do tabuleiro...")
+
+    # Exibe a visualização passo a passo
+    print("\nExibindo a visualização passo a passo do tabuleiro:")
+    exibir_movimentos(melhor_individuo)
 ```
 
-**Descrição:**
+- **Objetivo:**
+  - Coordenar a execução do Algoritmo Genético, exibir os resultados e iniciar a visualização da solução.
 
-- **Objetivo:** Executar todo o fluxo do Algoritmo Genético e exibir os resultados.
-
-- **Processo:**
-  1. **Inicialização:** Cria a população inicial.
-  2. **Evolução:** Executa o AG por um número definido de gerações.
-  3. **Resultados:**
-     - Verifica se uma solução completa foi encontrada.
-     - Exibe a visualização passo a passo dos movimentos.
+- **Como Funciona:**
+  1. **Inicialização:**
+     - Imprime o título do problema.
+     - Inicializa a população com indivíduos aleatórios.
+  2. **Execução do AG:**
+     - Chama a função `ag` para executar o Algoritmo Genético.
+     - Recebe o melhor indivíduo, as métricas por geração e o número de gerações executadas.
+  3. **Exibição da Melhor Solução:**
+     - Avalia e imprime se a solução encontrada é completa ou parcial.
+     - Exibe a aptidão da melhor solução.
      - Mostra a representação final do tabuleiro.
-     - Lista as casas visitadas em ordem.
-     - Indica se houve revisitações.
+     - Lista as posições das rainhas.
+     - Indica se há conflitos restantes.
+  4. **Exibição das Métricas:**
+     - Imprime métricas detalhadas sobre o desempenho do AG.
+  5. **Visualização:**
+     - Pausa a execução para permitir a leitura das métricas.
+     - Inicia a animação passo a passo da colocação das rainhas no tabuleiro.
 
-#### Limpar Tela
+- **Retorno:**
+  - Não retorna nada; executa ações de exibição no console.
+
+### Função `limpar_tela`
 
 ```python
 def limpar_tela() -> None:
-    os.system('cls' if os.name == 'nt' else 'clear')
+    """
+    Limpa a tela do console.
+    """
+    os.system("cls" if os.name == "nt" else "clear")
 ```
 
-**Descrição:**
+- **Objetivo:**
+  - Limpar a tela do console para melhorar a visualização da animação.
 
-- **Objetivo:** Limpar a tela do console para uma melhor visualização da animação.
+- **Como Funciona:**
+  - Utiliza comandos do sistema operacional para limpar a tela.
+  - `cls` para Windows (`nt`) e `clear` para Unix/Linux/MacOS.
 
----
+- **Retorno:**
+  - Não retorna nada; apenas executa a ação de limpar a tela.
+
+## Executando o Código
+
+### 1. **Instalar Dependências**
+
+Certifique-se de ter as bibliotecas necessárias instaladas. Você pode instalá-las usando o `pip`:
+
+```bash
+pip install numpy colorama
+```
+
+### 2. **Salvar o Código**
+
+Salve o código fornecido em um arquivo chamado `n_queens_ga.py`.
+
+### 3. **Executar o Script**
+
+Execute o script Python no terminal:
+
+```bash
+python n_queens_ga.py
+```
+
+### 4. **Interpretação da Saída**
+
+Ao executar o script, você deverá ver uma sequência de saídas no console que incluem:
+
+- Progresso do AG a cada 100 gerações.
+- Exibição da melhor solução encontrada.
+- Animação passo a passo do posicionamento das rainhas.
+- Apresentação das métricas do AG após a animação.
+
+**Exemplo de Saída:**
+
+```
+Problema das 8-Rainhas - Algoritmo Genético
+
+Iniciando o Algoritmo Genético...
+Geração 1: Melhor Aptidão = 20, Aptidão Média = 16.85
+Geração 100: Melhor Aptidão = 28, Aptidão Média = 24.75
+Geração 200: Melhor Aptidão = 28, Aptidão Média = 27.60
+...
+Geração 900: Melhor Aptidão = 28, Aptidão Média = 28.00
+Geração 1000: Melhor Aptidão = 28, Aptidão Média = 28.00
+
+Melhor Caminho Encontrado:
+Solução Completa!
+Aptidão: 28 / 28
+
+Representação Final do Tabuleiro:
+   A  B  C  D  E  F  G  H
+8  .  .  .  Q  .  .  .  . 
+7  .  .  .  .  .  .  Q  . 
+6  Q  .  .  .  .  .  .  . 
+5  .  .  .  .  .  Q  .  . 
+4  .  Q  .  .  .  .  .  . 
+3  .  .  .  .  Q  .  .  . 
+2  .  .  Q  .  .  .  .  . 
+1  .  .  .  .  .  .  Q  . 
+
+Lista Ordenada de Casas Visitadas:
+Linha 1: Coluna D
+Linha 2: Coluna G
+Linha 3: Coluna A
+Linha 4: Coluna F
+Linha 5: Coluna B
+Linha 6: Coluna E
+Linha 7: Coluna C
+Linha 8: Coluna H
+
+Todas as rainhas estão posicionadas sem conflitos.
+
+--- Métricas do Algoritmo Genético ---
+Total de Gerações Executadas: 1000
+Aptidão Final: 28 / 28
+Aptidão Média por Geração: 25.43
+Aptidão Máxima por Geração: 28
+Aptidão Mínima por Geração: 16
+Desvio Padrão da Aptidão Média: 3.21
+
+Pressione Enter para iniciar a visualização passo a passo do tabuleiro...
+
+Exibindo a visualização passo a passo do tabuleiro:
+```
+
+**Após Pressionar Enter:**
+
+Uma animação que posiciona uma rainha de cada vez no tabuleiro, atualizando a tela a cada meio segundo.
 
 ## Análise e Resultados
 
 ### Convergência
 
-A convergência do Algoritmo Genético para uma solução completa do Passeio do Cavalo depende de vários fatores:
-
-- **Tamanho da População:** Populações maiores tendem a explorar melhor o espaço de soluções.
-  
-- **Taxas de Crossover e Mutação:** Taxas balanceadas promovem diversidade sem perder a qualidade das soluções.
-
-- **Número de Gerações:** Mais gerações aumentam a chance de encontrar uma solução completa, mas também aumentam o tempo de execução.
-
-- **Estrutura do Problema:** O Passeio do Cavalo é um problema complexo, e a eficácia do AG pode variar dependendo da implementação e dos parâmetros escolhidos.
+O **Algoritmo Genético (AG)** tende a convergir para soluções de alta aptidão ao longo das gerações. A exibição da **aptidão média** juntamente com a **aptidão do melhor indivíduo** ajuda a monitorar se o AG está progredindo de forma eficaz ou se está estagnando.
 
 ### Eficiência
 
-- **Tempo de Execução:** A eficiência do AG é influenciada pelo tamanho da população, número de gerações e complexidade das operações genéticas.
-  
-- **Recursos Computacionais:** Implementações otimizadas e o uso de bibliotecas eficientes (como NumPy) podem melhorar significativamente a performance.
+- **Tempo de Execução:** O tempo de execução depende dos parâmetros escolhidos (`TAMANHO_POPULACAO`, `NUM_GENERACOES`) e da complexidade do problema (`N`). Para valores maiores de `N`, pode ser necessário aumentar o número de gerações ou ajustar as taxas de crossover e mutação.
 
-### Revisitações
+- **Recursos Computacionais:** Implementações otimizadas, como o uso de listas compreensivas e funções eficientes, ajudam a melhorar a performance do AG.
 
-- **Prevenção de Revisitações:** Garantir que o cavalo não visite a mesma casa mais de uma vez é crucial para a validade da solução.
-  
-- **Registro de Revisitações:** O algoritmo registra quaisquer tentativas de revisitação, permitindo identificar e corrigir problemas na geração de indivíduos.
+### Conflitos
 
----
+- **Conflitos Diagonais:** A função `obter_conflitos` garante que apenas os conflitos diagonais sejam contabilizados, já que a representação dos indivíduos impede conflitos de coluna.
+
+- **Solução Completa vs. Parcial:** O AG pode encontrar soluções completas (sem conflitos) ou parciais, dependendo dos parâmetros e da natureza do problema.
 
 ## Conclusão
 
-Este documento detalhou a implementação de um **Algoritmo Genético (AG)** para resolver o **Passeio do Cavalo** no tabuleiro de xadrez. Abordamos os conceitos fundamentais dos AGs, adaptando-os para o contexto específico do problema, e detalhamos cada parte do código implementado.
+Este **Algoritmo Genético (AG)** para o **Problema das N-Rainhas** demonstra como os AGs podem ser eficazes para resolver problemas de otimização complexos. As métricas significativas implementadas permitem um acompanhamento detalhado do progresso do algoritmo, facilitando o entendimento e a análise dos resultados.
 
-Embora os AGs sejam poderosos para resolver problemas complexos, sua eficácia depende fortemente dos parâmetros escolhidos e das implementações dos operadores genéticos. No caso do Passeio do Cavalo, a implementação cuidadosa dos operadores de **crossover** e **mutação** é essencial para evitar revisitações e encontrar soluções completas.
+**Recomendações para Estudos Futuros:**
 
-**Recomendações Finais:**
+1. **Ajuste de Parâmetros:**
+   - Experimente diferentes tamanhos de população, taxas de crossover e mutação para observar como influenciam a convergência.
 
-- **Ajustar Parâmetros:** Testar diferentes tamanhos de população, taxas de crossover e mutação para otimizar os resultados.
-  
-- **Implementar Heurísticas:** Integrar heurísticas como a **Regra de Warnsdorff** pode guiar o AG de forma mais eficiente.
-  
-- **Melhorar a Diversidade:** Garantir uma população diversificada evita a convergência prematura para soluções subótimas.
-  
-- **Paralelização:** Considerar a execução paralela do AG para acelerar o processo de busca por soluções.
+2. **Heurísticas Adicionais:**
+   - Integre heurísticas como a **Regra de Hill Climbing** ou **Simulated Annealing** para melhorar a eficiência do AG.
 
-Com as melhorias contínuas e ajustes finos, o Algoritmo Genético pode se tornar uma ferramenta eficaz para resolver o Passeio do Cavalo e outros problemas complexos de otimização.
+3. **Visualização Avançada:**
+   - Utilize bibliotecas gráficas como `matplotlib` para plotar gráficos de aptidão ao longo das gerações, oferecendo uma visualização mais clara do progresso.
+
+4. **Paralelização:**
+   - Explore a execução paralela do AG para acelerar o processo de busca, especialmente para valores grandes de `N`.
+
+5. **Diversificação da População:**
+   - Implemente mecanismos para garantir uma diversidade genética maior, evitando a convergência prematura para soluções subótimas.
+
+Este código serve como uma base sólida para a compreensão e estudo dos **Algoritmos Genéticos** aplicados ao **Problema das N-Rainhas**. Sinta-se à vontade para modificá-lo e adaptá-lo conforme necessário para atender às necessidades específicas de seus estudos e projetos.
 
 ---
 
 ## Referências
 
-1. **Mitchell, M.** (1998). *An Introduction to Genetic Algorithms*. MIT Press.
-2. **Whitley, D.** (1994). *A Genetic Algorithm Tutorial*. Statistics and Computing, 4(2), 65-85.
-3. **Warnsdorff's Rule:** Um método heurístico para resolver o Passeio do Cavalo, priorizando movimentos para casas com menos opções de saída.
-4. **Wikipedia:** 
-   - [Algoritmo Genético](https://pt.wikipedia.org/wiki/Algoritmo_genético)
-   - [Passeio do Cavalo](https://pt.wikipedia.org/wiki/Passeio_do_cavalo)
-5. **Python Documentation:** 
-   - [random](https://docs.python.org/3/library/random.html)
-   - [time](https://docs.python.org/3/library/time.html)
-   - [os](https://docs.python.org/3/library/os.html)
-6. **Colorama Documentation:** 
-   - [Colorama](https://pypi.org/project/colorama/)
-
----
-
-**Nota:** Este documento serve como material de estudo para entender a aplicação de Algoritmos Genéticos no problema do Passeio do Cavalo. Recomenda-se a execução e modificação do código apresentado para uma compreensão prática e aprofundada.
+- [Algoritmos Genéticos - Wikipedia](https://pt.wikipedia.org/wiki/Algoritmo_gen%C3%A9tico)
+- [Problema das N-Rainhas - Wikipedia](https://pt.wikipedia.org/wiki/Problema_das_n-rainhas)
+- [Colorama - PyPI](https://pypi.org/project/colorama/)
+- [NumPy - PyPI](https://pypi.org/project/numpy/)
